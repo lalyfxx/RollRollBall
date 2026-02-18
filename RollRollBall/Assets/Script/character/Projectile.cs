@@ -6,7 +6,7 @@ public class Projectile : MonoBehaviour
     public float speed = 12f;
     
     [Header("Vie du projectile")]
-    public float lifetime = 3f;        // disparaît après 3 secondes
+    public float lifetime = 3f;        
     
     [Header("Dommages")]
     public int damage = 1;
@@ -18,36 +18,36 @@ public class Projectile : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
         
-        // Pas de gravité, va tout droit
+        
         rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     void Start()
     {
-        // Auto-destruction après lifetime
+        
         Destroy(gameObject, lifetime);
     }
 
     void FixedUpdate()
     {
-        // Va tout droit vers la droite (dans le sens du runner)
+        
         rb.linearVelocity = Vector2.right * speed;
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Détruit les ennemis
+        
         Enemy enemy = other.GetComponent<Enemy>();
         if (enemy != null)
         {
             enemy.TakeDamage(damage);
-            Destroy(gameObject);  // Le projectile disparaît après impact
+            Destroy(gameObject); 
         }
     }
 
     void OnBecameInvisible()
     {
-        Destroy(gameObject);  // Optimisation : si hors écran
+        Destroy(gameObject); 
     }
 }

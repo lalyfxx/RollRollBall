@@ -14,7 +14,7 @@ public class WorldKill : MonoBehaviour
 
     private void GameOver()
     {
-        Debug.LogError("GAME OVER - Le slime a touché un ennemi !");
+        Debug.LogError("GAME OVER decor touché");
 
     
         Time.timeScale = 0f;

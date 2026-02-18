@@ -36,7 +36,7 @@ public class SlimeManager : MonoBehaviour
 {
     if (survivor == null) return;
 
-    // Détruire tous les slimes SAUF le survivor
+    
     foreach (var slime in activeSlimes.ToArray())
     {
         if (slime != null && slime != survivor)
@@ -45,10 +45,10 @@ public class SlimeManager : MonoBehaviour
         }
     }
 
-    // Nettoyer la liste et ne garder que le survivor
+    
     activeSlimes.Clear();
     activeSlimes.Add(survivor);
 
-    Debug.Log("Fusion terminée → un seul slime restant à taille normale");
+    Debug.Log("taille normale");
 }
 }

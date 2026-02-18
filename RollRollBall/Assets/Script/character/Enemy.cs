@@ -32,19 +32,18 @@ public class Enemy : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") || 
             collision.gameObject.GetComponent<CharacterManager>() != null)
         {
-            // Le slime touche l'ennemi → mort
+            
             GameOver();
         }
     }
 
     private void GameOver()
     {
-        Debug.LogError("GAME OVER - Le slime a touché un ennemi !");
+        Debug.LogError("GAME OVER");
 
-        // Arrête le jeu (tout s'arrête physiquement)
+    
         Time.timeScale = 0f;
 
-        // Option : tu peux aussi arrêter la musique, afficher un écran, etc.
-        // Pour l'instant on freeze juste la scène
+        
     }
 }

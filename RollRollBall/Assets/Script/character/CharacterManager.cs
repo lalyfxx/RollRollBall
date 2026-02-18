@@ -21,8 +21,8 @@ public class CharacterManager : MonoBehaviour
     [Header("Limite Division")]
     public int maxDivisions = 4;
 
-    [Header("PROJECTILE")]                    // ← ÇA c'est OK
-    public GameObject projectilePrefab;       // ← ÇA c'est OK
+    [Header("PROJECTILE")]                    
+    public GameObject projectilePrefab;       
     public Transform firePoint;
     public float projectileForce = 12f;
     public KeyCode shootKey = KeyCode.D;
@@ -32,7 +32,7 @@ public class CharacterManager : MonoBehaviour
     private bool isGrounded;
     private int currentDivisionLevel = 0;
     private Vector3 baseScale;
-    private float lastShootTime;              // ← NOUVEAU
+    private float lastShootTime;             
 
     void Awake()
     {
@@ -69,7 +69,7 @@ public class CharacterManager : MonoBehaviour
             MergeToNormal();
         }
 
-        // ───────────── TIR ─────────────
+        
         if (Input.GetKeyDown(shootKey) && Time.time > lastShootTime + shootCooldown)
         {
             Shoot();
@@ -86,7 +86,7 @@ public class CharacterManager : MonoBehaviour
         float scaleFactor = Mathf.Pow(splitScale, currentDivisionLevel);
         Vector3 newScale = baseScale * scaleFactor;
 
-        // Slime GAUCHE
+        
         GameObject left = Instantiate(slimePrefab, pos + Vector3.left * 0.4f, rot);
         left.transform.localScale = newScale;
         var leftRb = left.GetComponent<Rigidbody2D>();
@@ -99,7 +99,7 @@ public class CharacterManager : MonoBehaviour
             leftManager.baseScale = baseScale;
         }
 
-        // Slime DROIT
+        
         GameObject right = Instantiate(slimePrefab, pos + Vector3.right * 0.4f, rot);
         right.transform.localScale = newScale;
         var rightRb = right.GetComponent<Rigidbody2D>();
@@ -129,7 +129,7 @@ public class CharacterManager : MonoBehaviour
         SlimeManager.Instance.MergeAllSlimes(gameObject);
     }
 
-    // ───────────── NOUVEAU : FONCTION TIR ─────────────
+    
     private void Shoot()
     {
         if (projectilePrefab == null || firePoint == null) return;

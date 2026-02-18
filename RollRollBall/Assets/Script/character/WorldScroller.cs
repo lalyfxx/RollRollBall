@@ -3,7 +3,7 @@ using UnityEngine;
 public class WorldScroller : MonoBehaviour
 {
     [SerializeField] private float scrollSpeed = 6f;
-    [SerializeField] private bool scrollingRightToLeft = true;  // habituellement true
+    [SerializeField] private bool scrollingRightToLeft = true;  
 
     private float direction => scrollingRightToLeft ? -1f : 1f;
 
