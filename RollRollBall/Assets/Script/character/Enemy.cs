@@ -6,7 +6,7 @@ public class Enemy : MonoBehaviour
     public int health = 1;
 
     [Header("Effet mort")]
-    public GameObject deathEffect;  // optionnel
+    public GameObject deathEffect;  
 
     public void TakeDamage(int damage)
     {
@@ -26,9 +26,7 @@ public class Enemy : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // ────────────────────────────────────────────────
-    // CONTACT AVEC LE SLIME → GAME OVER
-    // ────────────────────────────────────────────────
+    
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player") || 
