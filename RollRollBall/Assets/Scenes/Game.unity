@@ -536,7 +536,7 @@ GameObject:
   m_Component:
   - component: {fileID: 713339225}
   - component: {fileID: 713339226}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bg (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -747,6 +747,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &889681691
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 889681692}
+  m_Layer: 0
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: -5487077368411116049, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &889681692
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 889681691}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -9.1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1848311462}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1006791686
 GameObject:
   m_ObjectHideFlags: 0
@@ -1026,7 +1057,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1045402133}
   - component: {fileID: 1045402134}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1118,7 +1149,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1259364212}
   - component: {fileID: 1259364213}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bg (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1205,7 +1236,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1346029825}
   - component: {fileID: 1346029826}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1473,7 +1504,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1606134831}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BG_Placeholder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1662,7 +1693,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1828623235}
   - component: {fileID: 1828623236}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: bg (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1785,7 +1816,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1934606762}
   - component: {fileID: 1934606763}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2024,6 +2055,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ennemy
       objectReference: {fileID: 0}
+    - target: {fileID: 4061165869028522927, guid: 4925d4dd6700128418a843f4927d3007, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5901000844479214723, guid: 4925d4dd6700128418a843f4927d3007, type: 3}
       propertyPath: m_LocalPosition.x
       value: 40.91
@@ -2087,7 +2122,7 @@ PrefabInstance:
     - target: {fileID: 1111261261031248552, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
       propertyPath: groundCheck
       value: 
-      objectReference: {fileID: 420020500}
+      objectReference: {fileID: 889681692}
     - target: {fileID: 1111261261031248552, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
       propertyPath: maxDivisions
       value: 1
@@ -2190,6 +2225,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3245738769856531981, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1834639947}
+    - targetCorrespondingSourceObject: {fileID: 3245738769856531981, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 889681692}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
 --- !u!1660057539 &9223372036854775807

@@ -67,7 +67,7 @@ public class CharacterManager : MonoBehaviour
         if (Input.GetKeyDown(mergeKey))
         {
             MergeToNormal();
-        }
+        } 
 
         
         if (Input.GetKeyDown(shootKey) && Time.time > lastShootTime + shootCooldown)
