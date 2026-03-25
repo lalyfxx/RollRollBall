@@ -2,20 +2,16 @@ using UnityEngine;
 
 public class CharacterManager : MonoBehaviour
 {
-    [Header("Mouvement")]
-    public float horizontalSpeed = 6f;
-
-    [Header("Saut & Sol")]
+    [Header("Mouvement & Saut")]
     public float jumpForce = 9f;
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
     public LayerMask whatIsGround;
 
-    [Header("Réduction de Taille")]
-    public float splitScale = 0.5f;           // Réduction par niveau
-    public int maxDivisions = 4;
-    public KeyCode reduceKey = KeyCode.S;     // Réduire
-    public KeyCode resetKey = KeyCode.F;      // Retour normal
+    [Header("Réduction Taille")]
+    public float smallScale = 0.5f;           // Taille quand il est petit
+    public KeyCode smallKey = KeyCode.S;      // Devenir petit
+    public KeyCode normalKey = KeyCode.F;     // Redevenir normal
 
     [Header("Projectile")]
     public GameObject projectilePrefab;
@@ -24,11 +20,16 @@ public class CharacterManager : MonoBehaviour
     public KeyCode shootKey = KeyCode.D;
     public float shootCooldown = 0.2f;
 
+    [Header("Animation")]
+    public Animator animator;
+
     private Rigidbody2D rb;
     private bool isGrounded;
-    private int currentDivisionLevel = 0;
-    private Vector3 baseScale;
+    private bool isSmall = false;
+    private Vector3 originalScale;
     private float lastShootTime;
+
+    private static readonly int IsSmall = Animator.StringToHash("IsSmall");
 
     void Awake()
     {
@@ -38,12 +39,14 @@ public class CharacterManager : MonoBehaviour
         rb.gravityScale = 3f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionX;
 
-        baseScale = transform.localScale;   // Sauvegarde taille originale (ex: 0.18)
+        originalScale = transform.localScale;
+
+        if (animator == null)
+            animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-        // Détection sol
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
 
         // Saut
@@ -52,39 +55,45 @@ public class CharacterManager : MonoBehaviour
             rb.linearVelocity = new Vector2(0f, jumpForce);
         }
 
-        // Réduire la taille
-        if (Input.GetKeyDown(reduceKey) && currentDivisionLevel < maxDivisions)
+        // Devenir petit
+        if (Input.GetKeyDown(smallKey) && !isSmall)
         {
-            ReduceSize();
+            BecomeSmall();
         }
 
-        // Retour taille normale
-        if (Input.GetKeyDown(resetKey))
+        // Redevenir normal
+        if (Input.GetKeyDown(normalKey) && isSmall)
         {
-            ResetToOriginalSize();
+            BecomeNormal();
         }
 
-        // Tirer
-        if (Input.GetKeyDown(shootKey) && Time.time > lastShootTime + shootCooldown)
+        // TIR → uniquement quand il n'est PAS petit
+        if (Input.GetKeyDown(shootKey) && !isSmall && Time.time > lastShootTime + shootCooldown)
         {
             Shoot();
         }
     }
 
-    private void ReduceSize()
+    private void BecomeSmall()
     {
-        currentDivisionLevel++;
-        float scaleFactor = Mathf.Pow(splitScale, currentDivisionLevel);
-        transform.localScale = baseScale * scaleFactor;
+        isSmall = true;
+        transform.localScale = originalScale * smallScale;
 
-        Debug.Log($"Slime réduit → Niveau {currentDivisionLevel} | Taille = {transform.localScale.x:F2}");
+        if (animator != null)
+            animator.SetBool(IsSmall, true);
+
+        Debug.Log("Slime → Mode PETIT (tir désactivé)");
     }
 
-    private void ResetToOriginalSize()
+    private void BecomeNormal()
     {
-        transform.localScale = baseScale;
-        currentDivisionLevel = 0;
-        Debug.Log("Slime retourné à sa taille originale");
+        isSmall = false;
+        transform.localScale = originalScale;
+
+        if (animator != null)
+            animator.SetBool(IsSmall, false);
+
+        Debug.Log("Slime → Mode NORMAL (tir activé)");
     }
 
     private void Shoot()
@@ -101,7 +110,6 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
-    // ====================== MORT DU JOUEUR ======================
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
@@ -113,7 +121,7 @@ public class CharacterManager : MonoBehaviour
     private void GameOver()
     {
         Debug.LogError("=== GAME OVER === Le slime a touché un ennemi !");
-        Time.timeScale = 0f;        // Arrête tout le jeu
+        Time.timeScale = 0f;
     }
 
     void OnDrawGizmosSelected()

@@ -3,17 +3,13 @@ using UnityEngine;
 public class WorldScroller : MonoBehaviour
 {
     [SerializeField] private float scrollSpeed = 6f;
-    [SerializeField] private bool scrollingRightToLeft = true;  
 
-    private float direction => scrollingRightToLeft ? -1f : 1f;
+    public static float GlobalScrollSpeed { get; private set; }
 
     void FixedUpdate()
     {
-        transform.position += Vector3.right * direction * scrollSpeed * Time.fixedDeltaTime;
+        transform.position += Vector3.right * -scrollSpeed * Time.fixedDeltaTime;
     }
-
-    // Pour debug / tests rapides
-    public static float GlobalScrollSpeed { get; private set; }
 
     void Update()
     {
