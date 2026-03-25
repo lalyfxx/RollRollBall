@@ -11,18 +11,14 @@ public class CharacterManager : MonoBehaviour
     public float groundCheckRadius = 0.2f;
     public LayerMask whatIsGround;
 
-    [Header("Division Slime")]
-    public GameObject slimePrefab;
-    public float splitScale = 0.5f;
-    public float splitForce = 3f;
-    public KeyCode splitKey = KeyCode.S;
-    public KeyCode mergeKey = KeyCode.F;
-
-    [Header("Limite Division")]
+    [Header("Réduction de Taille")]
+    public float splitScale = 0.5f;           // Réduction par niveau
     public int maxDivisions = 4;
+    public KeyCode reduceKey = KeyCode.S;     // Réduire
+    public KeyCode resetKey = KeyCode.F;      // Retour normal
 
-    [Header("PROJECTILE")]                    
-    public GameObject projectilePrefab;       
+    [Header("Projectile")]
+    public GameObject projectilePrefab;
     public Transform firePoint;
     public float projectileForce = 12f;
     public KeyCode shootKey = KeyCode.D;
@@ -32,7 +28,7 @@ public class CharacterManager : MonoBehaviour
     private bool isGrounded;
     private int currentDivisionLevel = 0;
     private Vector3 baseScale;
-    private float lastShootTime;             
+    private float lastShootTime;
 
     void Awake()
     {
@@ -42,94 +38,55 @@ public class CharacterManager : MonoBehaviour
         rb.gravityScale = 3f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionX;
 
-        baseScale = transform.localScale;
-
-        if (SlimeManager.Instance != null)
-        {
-            SlimeManager.Instance.RegisterSlime(gameObject);
-        }
+        baseScale = transform.localScale;   // Sauvegarde taille originale (ex: 0.18)
     }
 
     void Update()
     {
+        // Détection sol
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
 
+        // Saut
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.linearVelocity = new Vector2(0f, jumpForce);
         }
 
-        if (Input.GetKeyDown(splitKey) && slimePrefab != null && currentDivisionLevel < maxDivisions)
+        // Réduire la taille
+        if (Input.GetKeyDown(reduceKey) && currentDivisionLevel < maxDivisions)
         {
-            Split();
+            ReduceSize();
         }
 
-        if (Input.GetKeyDown(mergeKey))
+        // Retour taille normale
+        if (Input.GetKeyDown(resetKey))
         {
-            MergeToNormal();
-        } 
+            ResetToOriginalSize();
+        }
 
-        
+        // Tirer
         if (Input.GetKeyDown(shootKey) && Time.time > lastShootTime + shootCooldown)
         {
             Shoot();
         }
     }
 
-    private void Split()
+    private void ReduceSize()
     {
         currentDivisionLevel++;
-
-        Vector3 pos = transform.position;
-        Quaternion rot = transform.rotation;
-
         float scaleFactor = Mathf.Pow(splitScale, currentDivisionLevel);
-        Vector3 newScale = baseScale * scaleFactor;
+        transform.localScale = baseScale * scaleFactor;
 
-        
-        GameObject left = Instantiate(slimePrefab, pos + Vector3.left * 0.4f, rot);
-        left.transform.localScale = newScale;
-        var leftRb = left.GetComponent<Rigidbody2D>();
-        if (leftRb) leftRb.linearVelocity = new Vector2(-splitForce, 0f);
-
-        var leftManager = left.GetComponent<CharacterManager>();
-        if (leftManager)
-        {
-            leftManager.currentDivisionLevel = currentDivisionLevel;
-            leftManager.baseScale = baseScale;
-        }
-
-        
-        GameObject right = Instantiate(slimePrefab, pos + Vector3.right * 0.4f, rot);
-        right.transform.localScale = newScale;
-        var rightRb = right.GetComponent<Rigidbody2D>();
-        if (rightRb) rightRb.linearVelocity = new Vector2(splitForce, 0f);
-
-        var rightManager = right.GetComponent<CharacterManager>();
-        if (rightManager)
-        {
-            rightManager.currentDivisionLevel = currentDivisionLevel;
-            rightManager.baseScale = baseScale;
-        }
-
-        Destroy(gameObject);
+        Debug.Log($"Slime réduit → Niveau {currentDivisionLevel} | Taille = {transform.localScale.x:F2}");
     }
 
-    private void MergeToNormal()
+    private void ResetToOriginalSize()
     {
-        if (SlimeManager.Instance == null)
-        {
-            transform.localScale = baseScale;
-            currentDivisionLevel = 0;
-            return;
-        }
-
         transform.localScale = baseScale;
         currentDivisionLevel = 0;
-        SlimeManager.Instance.MergeAllSlimes(gameObject);
+        Debug.Log("Slime retourné à sa taille originale");
     }
 
-    
     private void Shoot()
     {
         if (projectilePrefab == null || firePoint == null) return;
@@ -138,10 +95,25 @@ public class CharacterManager : MonoBehaviour
 
         GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         Rigidbody2D projRb = proj.GetComponent<Rigidbody2D>();
-        if (projRb)
+        if (projRb != null)
         {
             projRb.linearVelocity = Vector2.right * projectileForce;
         }
+    }
+
+    // ====================== MORT DU JOUEUR ======================
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            GameOver();
+        }
+    }
+
+    private void GameOver()
+    {
+        Debug.LogError("=== GAME OVER === Le slime a touché un ennemi !");
+        Time.timeScale = 0f;        // Arrête tout le jeu
     }
 
     void OnDrawGizmosSelected()
@@ -149,13 +121,5 @@ public class CharacterManager : MonoBehaviour
         if (groundCheck == null) return;
         Gizmos.color = isGrounded ? Color.green : Color.red;
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
-    }
-
-    void OnDestroy()
-    {
-        if (SlimeManager.Instance != null)
-        {
-            SlimeManager.Instance.UnregisterSlime(gameObject);
-        }
     }
 }

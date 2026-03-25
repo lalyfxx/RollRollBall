@@ -2131,6 +2131,10 @@ PrefabInstance:
       propertyPath: projectilePrefab
       value: 
       objectReference: {fileID: 7547337514386791706, guid: 6136a7a9dcd89b9429b5d37b76a42567, type: 3}
+    - target: {fileID: 2605670961295804081, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 0a1c34a6e57fbe64ab3f2aa29530ed14, type: 2}
     - target: {fileID: 3245738769856531981, guid: 700758da2ef1cdd4aa6cbc4bb6177a95, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.18
