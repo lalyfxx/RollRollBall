@@ -1,10 +1,15 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;  
+using System.Collections;
 
 public class CheckpointManager : MonoBehaviour
 {
-    [Header("Respawn Settings")]
-    public Vector3 lastCheckpointPosition = Vector3.zero;
-    public float fallDeathHeight = -10f;        
+    [Header("Death & Scene Settings")]
+    public float fallDeathHeight = -10f;                    
+    public string gameOverSceneName = "GameOver";           
+
+    [Header("Respawn (optionnel)")]
+    public bool useRespawnInsteadOfGameOver = false;        
 
     private CharacterManager player;
 
@@ -14,40 +19,18 @@ public class CheckpointManager : MonoBehaviour
 
         if (player == null)
         {
-            Debug.LogError("CheckpointManager : Aucun CharacterManager trouvé !");
-            return;
+            Debug.LogError("CheckpointManager : Aucun CharacterManager trouvé dans la scène !");
         }
-
-        lastCheckpointPosition = player.transform.position;
     }
 
     void Update()
     {
-        if (player != null && player.transform.position.y < fallDeathHeight)
-        {
-            RespawnAtCheckpoint();
-        }
-    }
-
-    public void UpdateCheckpoint(Vector3 newPosition)
-    {
-        lastCheckpointPosition = newPosition;
-        Debug.Log("Checkpoint mis à jour ! Nouvelle position : " + newPosition);
-    }
-
-    private void RespawnAtCheckpoint()
-    {
         if (player == null) return;
 
-        player.transform.position = lastCheckpointPosition;
-
-        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        if (player.transform.position.y < fallDeathHeight)
         {
-            rb.linearVelocity = Vector2.zero;
+            TriggerGameOver();
         }
-
-        Debug.Log("Le joueur est tombé dans le vide → Respawn au checkpoint");
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -55,7 +38,32 @@ public class CheckpointManager : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") || 
             collision.gameObject.GetComponent<CharacterManager>() != null)
         {
-            RespawnAtCheckpoint();
+            TriggerGameOver();
+        }
+    }
+
+    private void TriggerGameOver()
+    {
+        Debug.LogError("=== GAME OVER === Le joueur est tombé dans le vide !");
+
+        Time.timeScale = 0f;
+
+        StartCoroutine(LoadGameOverScene());
+    }
+
+    private IEnumerator LoadGameOverScene()
+    {
+        yield return new WaitForSecondsRealtime(1.2f);
+
+        Time.timeScale = 1f;
+
+        if (!string.IsNullOrEmpty(gameOverSceneName))
+        {
+            SceneManager.LoadScene(gameOverSceneName);
+        }
+        else
+        {
+            Debug.LogError("Aucun nom de scène Game Over défini dans CheckpointManager !");
         }
     }
 }
