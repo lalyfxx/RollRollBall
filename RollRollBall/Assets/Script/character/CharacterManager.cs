@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class CharacterManager : MonoBehaviour
 {
@@ -9,15 +10,16 @@ public class CharacterManager : MonoBehaviour
     public LayerMask whatIsGround;
 
     [Header("Réduction Taille")]
-    public float smallScale = 0.5f;           // Taille quand il est petit
-    public KeyCode smallKey = KeyCode.S;      // Devenir petit
-    public KeyCode normalKey = KeyCode.F;     // Redevenir normal
+    public float smallScale = 0.5f;
+    public KeyCode smallKey = KeyCode.Q;
+    public KeyCode normalKey = KeyCode.D;
+    public float sizeChangeCooldown = 0.6f;
 
     [Header("Projectile")]
     public GameObject projectilePrefab;
     public Transform firePoint;
     public float projectileForce = 12f;
-    public KeyCode shootKey = KeyCode.D;
+    public KeyCode shootKey = KeyCode.S;
     public float shootCooldown = 0.2f;
 
     [Header("Animation")]
@@ -28,8 +30,12 @@ public class CharacterManager : MonoBehaviour
     private bool isSmall = false;
     private Vector3 originalScale;
     private float lastShootTime;
+    private float lastSizeChangeTime;
 
     private static readonly int IsSmall = Animator.StringToHash("IsSmall");
+
+    private SpriteRenderer spriteRenderer;
+    private Coroutine flashCoroutine;   // ← Important pour arrêter l'ancien clignotement
 
     void Awake()
     {
@@ -43,6 +49,10 @@ public class CharacterManager : MonoBehaviour
 
         if (animator == null)
             animator = GetComponent<Animator>();
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     void Update()
@@ -55,22 +65,32 @@ public class CharacterManager : MonoBehaviour
             rb.linearVelocity = new Vector2(0f, jumpForce);
         }
 
-        // Devenir petit
-        if (Input.GetKeyDown(smallKey) && !isSmall)
+        // Changement de taille avec cooldown
+        if (Time.time > lastSizeChangeTime + sizeChangeCooldown)
         {
-            BecomeSmall();
+            if (Input.GetKeyDown(smallKey) && !isSmall)
+            {
+                BecomeSmall();
+            }
+
+            if (Input.GetKeyDown(normalKey) && isSmall)
+            {
+                BecomeNormal();
+            }
         }
 
-        // Redevenir normal
-        if (Input.GetKeyDown(normalKey) && isSmall)
+        // Tentative de tir
+        if (Input.GetKeyDown(shootKey))
         {
-            BecomeNormal();
-        }
-
-        // TIR → uniquement quand il n'est PAS petit
-        if (Input.GetKeyDown(shootKey) && !isSmall && Time.time > lastShootTime + shootCooldown)
-        {
-            Shoot();
+            if (!isSmall)
+            {
+                if (Time.time > lastShootTime + shootCooldown)
+                    Shoot();
+            }
+            else
+            {
+                FlashRedFeedback();     // Version améliorée
+            }
         }
     }
 
@@ -78,22 +98,24 @@ public class CharacterManager : MonoBehaviour
     {
         isSmall = true;
         transform.localScale = originalScale * smallScale;
+        lastSizeChangeTime = Time.time;
 
         if (animator != null)
             animator.SetBool(IsSmall, true);
 
-        Debug.Log("Slime → Mode PETIT (tir désactivé)");
+        Debug.Log("Slime → Mode PETIT");
     }
 
     private void BecomeNormal()
     {
         isSmall = false;
         transform.localScale = originalScale;
+        lastSizeChangeTime = Time.time;
 
         if (animator != null)
             animator.SetBool(IsSmall, false);
 
-        Debug.Log("Slime → Mode NORMAL (tir activé)");
+        Debug.Log("Slime → Mode NORMAL");
     }
 
     private void Shoot()
@@ -110,6 +132,38 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
+    // ====================== FEEDBACK CLIGNOTEMENT ======================
+    private void FlashRedFeedback()
+    {
+        // Arrête le clignotement précédent s'il est encore en cours
+        if (flashCoroutine != null)
+            StopCoroutine(flashCoroutine);
+
+        flashCoroutine = StartCoroutine(FlashRedRoutine());
+    }
+
+    private IEnumerator FlashRedRoutine()
+    {
+        if (spriteRenderer == null) yield break;
+
+        Color originalColor = spriteRenderer.color;
+        float duration = 0.35f;
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            // Clignotement plus net et contrôlé
+            float alpha = Mathf.PingPong(timer * 15f, 1f);
+            spriteRenderer.color = Color.Lerp(originalColor, new Color(1f, 0.3f, 0.3f), alpha);
+            yield return null;
+        }
+
+        // Retour garanti à la couleur d'origine
+        spriteRenderer.color = originalColor;
+    }
+
+    // ====================== COLLISIONS ======================
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
