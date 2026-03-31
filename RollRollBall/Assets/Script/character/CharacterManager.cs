@@ -32,10 +32,13 @@ public class CharacterManager : MonoBehaviour
     private float lastShootTime;
     private float lastSizeChangeTime;
 
+    // Hash pour l'Animator
     private static readonly int IsSmall = Animator.StringToHash("IsSmall");
+    private static readonly int ShrinkTrigger = Animator.StringToHash("Shrink");   // Transition vers petit
+    private static readonly int GrowTrigger = Animator.StringToHash("Grow");       // Transition vers normal
 
     private SpriteRenderer spriteRenderer;
-    private Coroutine flashCoroutine;   // ← Important pour arrêter l'ancien clignotement
+    private Coroutine flashCoroutine;
 
     void Awake()
     {
@@ -89,7 +92,7 @@ public class CharacterManager : MonoBehaviour
             }
             else
             {
-                FlashRedFeedback();     // Version améliorée
+                FlashRedFeedback();
             }
         }
     }
@@ -97,11 +100,17 @@ public class CharacterManager : MonoBehaviour
     private void BecomeSmall()
     {
         isSmall = true;
-        transform.localScale = originalScale * smallScale;
         lastSizeChangeTime = Time.time;
 
+        // Animation de transition vers petit
         if (animator != null)
-            animator.SetBool(IsSmall, true);
+        {
+            animator.SetTrigger(ShrinkTrigger);
+            animator.SetBool(IsSmall, true);        // Pour l'état idle petit
+        }
+
+        // On change la taille après un petit délai (pour laisser le temps à l'animation de démarrer)
+        StartCoroutine(ChangeScaleWithDelay(smallScale, 0.15f));
 
         Debug.Log("Slime → Mode PETIT");
     }
@@ -109,13 +118,26 @@ public class CharacterManager : MonoBehaviour
     private void BecomeNormal()
     {
         isSmall = false;
-        transform.localScale = originalScale;
         lastSizeChangeTime = Time.time;
 
+        // Animation de transition vers normal
         if (animator != null)
+        {
+            animator.SetTrigger(GrowTrigger);
             animator.SetBool(IsSmall, false);
+        }
+
+        // Changement de taille avec délai
+        StartCoroutine(ChangeScaleWithDelay(1f, 0.15f));
 
         Debug.Log("Slime → Mode NORMAL");
+    }
+
+    // Coroutine pour changer la taille avec un léger délai (permet à l'animation de transition de commencer)
+    private IEnumerator ChangeScaleWithDelay(float targetScaleFactor, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        transform.localScale = originalScale * targetScaleFactor;
     }
 
     private void Shoot()
@@ -132,10 +154,8 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
-    // ====================== FEEDBACK CLIGNOTEMENT ======================
     private void FlashRedFeedback()
     {
-        // Arrête le clignotement précédent s'il est encore en cours
         if (flashCoroutine != null)
             StopCoroutine(flashCoroutine);
 
@@ -153,17 +173,14 @@ public class CharacterManager : MonoBehaviour
         while (timer < duration)
         {
             timer += Time.deltaTime;
-            // Clignotement plus net et contrôlé
             float alpha = Mathf.PingPong(timer * 15f, 1f);
             spriteRenderer.color = Color.Lerp(originalColor, new Color(1f, 0.3f, 0.3f), alpha);
             yield return null;
         }
 
-        // Retour garanti à la couleur d'origine
         spriteRenderer.color = originalColor;
     }
 
-    // ====================== COLLISIONS ======================
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
